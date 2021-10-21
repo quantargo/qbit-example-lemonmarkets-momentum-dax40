@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - master
-      - next
 
 name: Build and Deploy
 
@@ -38,20 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-renv-
   
-      - name: Install R packages next
+      - name: Install R packages
         env:
           GITHUB_PAT: ${{ secrets.GIT_PAT }}
-        if: endsWith(github.ref, '/next')
-        run: |
-          renv::restore()
-          install.packages("remotes")
-          remotes::install_github(paste(c("quantargo/qbit"), "next", sep="@"), upgrade="never")
-        shell: Rscript {0}
-
-      - name: Install R packages master
-        env:
-          GITHUB_PAT: ${{ secrets.GIT_PAT }}
-        if: endsWith(github.ref, '/master')
         run: |
           renv::restore()
           install.packages("remotes")
@@ -64,10 +52,8 @@ jobs:
           STAGE: prod
           REPONAME: ${{ github.event.repository.name }}
           QKEY: ${{ secrets.QKEY_PROD }}
-          TWITTER_API_KEY: ${{ secrets.TWITTER_SUSTAIN_API_KEY }}
-          TWITTER_API_SECRET: ${{ secrets.TWITTER_SUSTAIN_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_SUSTAIN_ACCESS_TOKEN }}
-          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_SUSTAIN_ACCESS_SECRET }}
+          LEMON_MARKETS_CLIENT_ID: ${{ secrets.LEMON_MARKETS_CLIENT_ID }}
+          LEMON_MARKETS_CLIENT_SECRET: ${{ secrets.LEMON_MARKETS_CLIENT_SECRET }}
         if: endsWith(github.ref, '/master')
         run: |
           library(qbit)
@@ -78,40 +64,7 @@ jobs:
             apikey = Sys.getenv("QKEY"),
             source_main_file = FALSE, 
             secrets = list(
-              TWITTER_API_KEY =  Sys.getenv("TWITTER_API_KEY"),
-              TWITTER_API_SECRET =  Sys.getenv("TWITTER_API_SECRET"),
-              TWITTER_ACCESS_TOKEN =  Sys.getenv("TWITTER_ACCESS_TOKEN"),
-              TWITTER_ACCESS_SECRET =  Sys.getenv("TWITTER_ACCESS_SECRET")
-            ))
-        shell: Rscript {0}
-        
-      - name: Build and Deploy QBit (Dev)
-        env:
-          GITHUB_PAT: ${{ secrets.GIT_PAT }}
-          STAGE: dev
-          REPONAME: ${{ github.event.repository.name }}
-          QKEY: ${{ secrets.QKEY_DEV }}
-          QBITURL: https://api.quantargo.com/v2-dev
-          TWITTER_API_KEY: ${{ secrets.TWITTER_SUSTAIN_API_KEY }}
-          TWITTER_API_SECRET: ${{ secrets.TWITTER_SUSTAIN_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_SUSTAIN_ACCESS_TOKEN }}
-          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_SUSTAIN_ACCESS_SECRET }}
-        if: endsWith(github.ref, '/next')
-        run: |
-          library(qbit)
-          idx <- yaml::read_yaml("index.yml")
-          idx$schedules[[1]]$enabled <- FALSE
-          idx$schedules[[2]]$enabled <- FALSE
-          deploy(Sys.getenv("REPONAME"),
-            main_file = c("main.R"),
-            index = idx,
-            meta = list(type="qbit"),
-            apikey = Sys.getenv("QKEY"),
-            source_main_file = FALSE, 
-            secrets = list(
-              TWITTER_API_KEY =  Sys.getenv("TWITTER_API_KEY"),
-              TWITTER_API_SECRET =  Sys.getenv("TWITTER_API_SECRET"),
-              TWITTER_ACCESS_TOKEN =  Sys.getenv("TWITTER_ACCESS_TOKEN"),
-              TWITTER_ACCESS_SECRET =  Sys.getenv("TWITTER_ACCESS_SECRET")
+              LEMON_MARKETS_CLIENT_ID =  Sys.getenv("LEMON_MARKETS_CLIENT_ID"),
+              LEMON_MARKETS_CLIENT_SECRET =  Sys.getenv("LEMON_MARKETS_CLIENT_SECRET")
             ))
         shell: Rscript {0}
