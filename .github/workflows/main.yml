@@ -41,7 +41,7 @@ jobs:
         env:
           GITHUB_PAT: ${{ secrets.GIT_PAT }}
         run: |
-          renv::restore()
+          #renv::restore()
           install.packages("remotes")
           remotes::install_github(paste(c("quantargo/qbit"), "master", sep="@"), upgrade="never")
         shell: Rscript {0}
