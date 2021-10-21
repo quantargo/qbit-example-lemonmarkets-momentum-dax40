@@ -1,0 +1,24 @@
+title: Trading Dax 40 Momentum Daily Rebalancing Lemonmarkets
+technologies:
+- R
+repo: https://github.com/quantargo/qbit-example-lemonmarkets-momentum-dax40
+image: cover.png
+ogImage: cover.png
+description: Workspace example showing a portfolio trading bot buying the 10 DAX stocks with the highest 1-Month Momentum. To have more action we do a daily rebalancing.
+usagePlan: public
+createdAt: '2021-10-21'
+createdBy: Quantargo
+secrets:
+- LEMON_MARKETS_CLIENT_ID
+- LEMON_MARKETS_CLIENT_SECRET
+schedules:
+- file: main.R
+  schedule: 30 9 * * *
+  enabled: true
+  publish: false
+  timeZone: Europe/Vienna
+tags:
+- finance
+- portfolio
+- trading
+- lemonmarkets

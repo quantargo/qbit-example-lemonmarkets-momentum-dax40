@@ -1,0 +1,117 @@
+on:
+  push:
+    branches:
+      - master
+      - next
+
+name: Build and Deploy
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v1
+        with:
+          lfs: true
+
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: '4.0.5'
+
+      - uses: r-lib/actions/setup-pandoc@v1
+      
+      - name: Install SO Files
+        run: |
+          sudo apt-get install libopenblas-dev libcurl4-openssl-dev
+  
+      - name: Install Python deployment packages
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
+          sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+  
+      - name: Install R packages next
+        env:
+          GITHUB_PAT: ${{ secrets.GIT_PAT }}
+        if: endsWith(github.ref, '/next')
+        run: |
+          renv::restore()
+          install.packages("remotes")
+          remotes::install_github(paste(c("quantargo/qbit"), "next", sep="@"), upgrade="never")
+        shell: Rscript {0}
+
+      - name: Install R packages master
+        env:
+          GITHUB_PAT: ${{ secrets.GIT_PAT }}
+        if: endsWith(github.ref, '/master')
+        run: |
+          renv::restore()
+          install.packages("remotes")
+          remotes::install_github(paste(c("quantargo/qbit"), "master", sep="@"), upgrade="never")
+        shell: Rscript {0}
+        
+      - name: Build and Deploy QBit (Prod)
+        env:
+          GITHUB_PAT: ${{ secrets.GIT_PAT }}
+          STAGE: prod
+          REPONAME: ${{ github.event.repository.name }}
+          QKEY: ${{ secrets.QKEY_PROD }}
+          TWITTER_API_KEY: ${{ secrets.TWITTER_SUSTAIN_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_SUSTAIN_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_SUSTAIN_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_SUSTAIN_ACCESS_SECRET }}
+        if: endsWith(github.ref, '/master')
+        run: |
+          library(qbit)
+          deploy(Sys.getenv("REPONAME"),
+            main_file = c("main.R"),
+            index = yaml::read_yaml("index.yml"),
+            meta = list(type="qbit"),
+            apikey = Sys.getenv("QKEY"),
+            source_main_file = FALSE, 
+            secrets = list(
+              TWITTER_API_KEY =  Sys.getenv("TWITTER_API_KEY"),
+              TWITTER_API_SECRET =  Sys.getenv("TWITTER_API_SECRET"),
+              TWITTER_ACCESS_TOKEN =  Sys.getenv("TWITTER_ACCESS_TOKEN"),
+              TWITTER_ACCESS_SECRET =  Sys.getenv("TWITTER_ACCESS_SECRET")
+            ))
+        shell: Rscript {0}
+        
+      - name: Build and Deploy QBit (Dev)
+        env:
+          GITHUB_PAT: ${{ secrets.GIT_PAT }}
+          STAGE: dev
+          REPONAME: ${{ github.event.repository.name }}
+          QKEY: ${{ secrets.QKEY_DEV }}
+          QBITURL: https://api.quantargo.com/v2-dev
+          TWITTER_API_KEY: ${{ secrets.TWITTER_SUSTAIN_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_SUSTAIN_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_SUSTAIN_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_SUSTAIN_ACCESS_SECRET }}
+        if: endsWith(github.ref, '/next')
+        run: |
+          library(qbit)
+          idx <- yaml::read_yaml("index.yml")
+          idx$schedules[[1]]$enabled <- FALSE
+          idx$schedules[[2]]$enabled <- FALSE
+          deploy(Sys.getenv("REPONAME"),
+            main_file = c("main.R"),
+            index = idx,
+            meta = list(type="qbit"),
+            apikey = Sys.getenv("QKEY"),
+            source_main_file = FALSE, 
+            secrets = list(
+              TWITTER_API_KEY =  Sys.getenv("TWITTER_API_KEY"),
+              TWITTER_API_SECRET =  Sys.getenv("TWITTER_API_SECRET"),
+              TWITTER_ACCESS_TOKEN =  Sys.getenv("TWITTER_ACCESS_TOKEN"),
+              TWITTER_ACCESS_SECRET =  Sys.getenv("TWITTER_ACCESS_SECRET")
+            ))
+        shell: Rscript {0}
