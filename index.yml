@@ -4,7 +4,7 @@ technologies:
 repo: https://github.com/quantargo/qbit-example-lemonmarkets-reversion-dax40
 image: cover.png
 ogImage: cover.png
-description: Workspace example showing a portfolio trading bot buying the 10 DAX stocks with the highest 1-Month Momentum. To have more action we do a daily rebalancing.
+description: Workspace example showing a portfolio trading bot buying the 10 DAX stocks with the lowest 1 month (25 day) Momentum. To have more action we do a daily rebalancing.
 usagePlan: public
 createdAt: '2021-10-21'
 createdBy: Quantargo
