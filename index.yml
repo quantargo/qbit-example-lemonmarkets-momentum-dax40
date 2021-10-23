@@ -13,7 +13,7 @@ secrets:
 - LEMON_MARKETS_CLIENT_SECRET
 schedules:
 - file: main.R
-  schedule: 30 9 * * *
+  schedule: 30 9 * * 1-5
   enabled: true
   publish: false
   timeZone: Europe/Vienna
