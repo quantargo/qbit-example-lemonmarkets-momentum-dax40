@@ -108,7 +108,7 @@ if (trade_target %>% filter(delta < 0) %>% nrow() > 0) {
       mutate(orders = create_order(space_id, ISIN, delta))
    
    cat("The following sell trades have been executed: \n")
-   trade_orders_sell %>% select(Company.Name, ISIN, delta, orders.uuid)
+   trade_orders_sell %>% select(Company.Name, ISIN, delta)
    time_sleep <- 10
    cat(sprintf("Sleeping %d sec...\n", time_sleep))
    Sys.sleep(time_sleep)
@@ -121,6 +121,6 @@ if (trade_target %>% filter(delta > 0) %>% nrow() > 0) {
       unnest(orders)
    
    cat("The following buy trades have been executed: \n")
-   trade_orders_buy %>% select(Company.Name, ISIN, delta, orders.uuid)
+   trade_orders_buy %>% select(Company.Name, ISIN, delta)
 }
 
