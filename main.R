@@ -77,7 +77,7 @@ space_id <- "e44907b7-d131-4ec9-9647-a2649480003d"
 
 # 1. Get total space value (portfolio+cash)
 bal <- balance(space_id) # Get current cash balance
-portfolio_current <- get_portfolio(space_id)
+portfolio_current <- portfolio(space_id)
 total_value <- sum(portfolio_current$latest_total_value) + bal
 
 # 2. Get target exposure
@@ -86,7 +86,7 @@ trade_target <- fortify.zoo(tail(port_weights, 1)) %>%
   mutate(exposure = weight * total_value) %>%
   left_join(dax40_components, by = c(name = "Symbol")) %>%
   rowwise() %>%
-  mutate(quote = get_quotes(ISIN)) %>%
+  mutate(quote = quotes(ISIN)) %>%
   mutate(position = floor(exposure / quote$a)) %>%
   full_join(portfolio_current, by = c(ISIN = "instrument.isin")) %>%
   mutate(position = replace_na(position, 0),

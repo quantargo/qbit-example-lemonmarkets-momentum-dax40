@@ -123,15 +123,15 @@
     },
     "lemonmarkets": {
       "Package": "lemonmarkets",
-      "Version": "0.0.0.9000",
+      "Version": "0.0.1",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "quantargo",
       "RemoteRepo": "lemonmarkets",
       "RemoteRef": "master",
-      "RemoteSha": "c8259f462ac85c6a0ed3100e045842be0767edfa",
-      "Hash": "7a5d949813b1330f59d36ee59ddb3452"
+      "RemoteSha": "1a24d21ff67bb2ce3e65119511dae3a11b804292",
+      "Hash": "421f51535bcd9884ed310bea3825feb8"
     },
     "lifecycle": {
       "Package": "lifecycle",
