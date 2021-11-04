@@ -92,6 +92,7 @@ trade_target <- fortify.zoo(tail(port_weights, 1)) %>%
   mutate(position = replace_na(position, 0),
          quantity = replace_na(quantity, 0),
          delta = position - quantity) %>%
+  rename(portfolio_quantity = quantity) %>%
   filter(delta != 0)
  
 if (nrow(trade_target) < 1) {
